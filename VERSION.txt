@@ -1,0 +1,15 @@
+asr_cli
+Created: 2026-07-28
+Platform: macOS arm64 / Apple Silicon
+
+Bundled components:
+- Open Flow ofasr release binary
+- ffmpeg macOS arm64 binary
+- SenseVoice Small ONNX local model
+
+Recommended entrypoint:
+./transcribe <audio-file> -o <result.txt>
+
+Verified locally:
+- Model check: ready
+- Test transcription: passed
