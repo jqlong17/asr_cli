@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  check)
+    if [[ "${2:-}" == "--json" ]]; then
+      printf '{"tool":"vision_cli","status":"planned","ready":false,"missing":["models/vision/<model-pack>"]}\n'
+    else
+      echo "vision_cli planned; image embedding model pack is not installed"
+    fi
+    exit 1
+    ;;
+  -h|--help|help|"")
+    cat <<'USAGE'
+Usage:
+  vision_cli check [--json]
+  vision_cli embed image.png -o image.vector.json
+  vision_cli index images/ -o image_index/
+  vision_cli search "query" image_index/
+
+Status:
+  Planned. MobileCLIP/Nomic Vision model pack is not bundled yet.
+USAGE
+    ;;
+  *)
+    echo "vision_cli is planned but not implemented yet. See docs/LOCAL_AI_TOOLBOX_ROADMAP.md" >&2
+    exit 2
+    ;;
+esac

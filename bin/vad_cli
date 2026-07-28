@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  vad_cli check [--json]
+  vad_cli segment <audio-file> -o segments.json
+  vad_cli split <audio-file> -o chunks/
+
+Status:
+  Planned. Silero VAD ONNX is not bundled yet.
+USAGE
+}
+
+case "${1:-}" in
+  check)
+    if [[ "${2:-}" == "--json" ]]; then
+      printf '{"tool":"vad_cli","status":"planned","ready":false,"missing":["models/vad/silero/model.onnx"]}\n'
+    else
+      echo "vad_cli planned; missing models/vad/silero/model.onnx"
+    fi
+    exit 1
+    ;;
+  -h|--help|help|"")
+    usage
+    ;;
+  *)
+    echo "vad_cli is planned but not implemented yet. See docs/LOCAL_AI_TOOLBOX_ROADMAP.md" >&2
+    exit 2
+    ;;
+esac

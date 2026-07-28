@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  check)
+    if [[ "${2:-}" == "--json" ]]; then
+      printf '{"tool":"tts_cli","status":"planned","ready":false,"missing":["models/tts/kokoro/model.onnx","models/tts/kokoro/voices.bin","models/tts/kokoro/tokens.txt"]}\n'
+    else
+      echo "tts_cli planned; Kokoro model pack is not installed"
+    fi
+    exit 1
+    ;;
+  -h|--help|help|"")
+    cat <<'USAGE'
+Usage:
+  tts_cli check [--json]
+  tts_cli speak "text" -o output.wav
+
+Status:
+  Planned. Kokoro TTS model pack is not bundled yet.
+USAGE
+    ;;
+  *)
+    echo "tts_cli is planned but not implemented yet. See docs/LOCAL_AI_TOOLBOX_ROADMAP.md" >&2
+    exit 2
+    ;;
+esac

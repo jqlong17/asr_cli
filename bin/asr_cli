@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  asr_cli check [--json]
+  asr_cli transcribe <audio-file> [-o output.txt] [--json]
+  asr_cli serve [--addr 127.0.0.1:8765]
+  asr_cli transcribe-server <audio-file> [-o output.txt] [--json]
+
+Compatibility:
+  Existing ./transcribe, ./serve, and ./transcribe-server scripts remain supported.
+USAGE
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 2
+fi
+
+cmd="$1"
+shift
+
+case "$cmd" in
+  check)
+    exec "$ROOT_DIR/bin/ofasr" check --model "$ROOT_DIR/model" "$@"
+    ;;
+  transcribe)
+    exec "$ROOT_DIR/transcribe" "$@"
+    ;;
+  serve)
+    exec "$ROOT_DIR/serve" "$@"
+    ;;
+  transcribe-server)
+    exec "$ROOT_DIR/transcribe-server" "$@"
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Unknown asr_cli command: $cmd" >&2
+    usage
+    exit 2
+    ;;
+esac

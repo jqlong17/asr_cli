@@ -2,6 +2,19 @@
 
 一个可以直接发给别人使用的本地音频转文字工具包。
 
+长期方向是一个小而快的本地 AI CLI 工具箱，但当前主线仍然是 `asr_cli`：
+
+```text
+asr_cli       语音转文字，当前可用
+vad_cli       人声检测/切段，计划中
+tts_cli       小型 TTS，计划中
+embed_cli     文本向量/本地检索，计划中
+vision_cli    图片向量/图片检索，计划中
+route_cli     小模型意图识别/工具路由，计划中
+```
+
+设计原则见 [`docs/LOCAL_AI_TOOLBOX_ROADMAP.md`](docs/LOCAL_AI_TOOLBOX_ROADMAP.md)。所有非 ASR 能力都会作为可选模型包推进，不会默认塞进主包。
+
 ## 下载
 
 请从 GitHub Releases 下载 `asr_cli.zip`。完整压缩包里已经包含 SenseVoice Small ONNX 模型，不需要使用者再下载模型。
@@ -16,6 +29,8 @@
 - `transcribe`：推荐入口脚本，支持 mp3 / wav / m4a / mp4 / mov 等常见音视频输入
 - `serve`：常驻本机 HTTP 服务，启动后模型只加载一次
 - `transcribe-server`：连接 `serve` 的客户端脚本，适合批量短音频
+- `bin/asr_cli`：统一 ASR 命令入口，兼容现有脚本
+- `bin/vad_cli` / `bin/tts_cli` / `bin/embed_cli` / `bin/vision_cli` / `bin/route_cli`：未来工具入口，目前只提供明确的 planned/check 状态，不伪造结果
 
 ## 使用方式
 
@@ -41,6 +56,13 @@ cd /path/to/asr_cli
 
 ```bash
 ./transcribe /path/to/audio.mp3 --json -o /path/to/result.json
+```
+
+也可以使用统一入口：
+
+```bash
+./bin/asr_cli transcribe /path/to/audio.mp3 -o /path/to/result.txt
+./bin/asr_cli check --json
 ```
 
 ## 常驻服务模式

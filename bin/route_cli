@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  check)
+    if [[ "${2:-}" == "--json" ]]; then
+      printf '{"tool":"route_cli","status":"planned","ready":false,"missing":["models/route/model.gguf"]}\n'
+    else
+      echo "route_cli planned; route model pack is not installed"
+    fi
+    exit 1
+    ;;
+  -h|--help|help|"")
+    cat <<'USAGE'
+Usage:
+  route_cli check [--json]
+  route_cli route "user request"
+
+Status:
+  Planned. Small GGUF route model pack is not bundled yet.
+USAGE
+    ;;
+  *)
+    echo "route_cli is planned but not implemented yet. See docs/LOCAL_AI_TOOLBOX_ROADMAP.md" >&2
+    exit 2
+    ;;
+esac

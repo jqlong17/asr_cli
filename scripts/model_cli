@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REGISTRY="$ROOT_DIR/configs/model_registry.json"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  scripts/model_cli list
+  scripts/model_cli check
+
+Notes:
+  This is a lightweight registry helper. It does not download optional model packs yet.
+USAGE
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 2
+fi
+
+case "$1" in
+  list)
+    if command -v jq >/dev/null 2>&1; then
+      jq -r '.models[] | "\(.tool)\t\(.id)\t\(.status)\t\(.size_class)"' "$REGISTRY"
+    else
+      sed -n 's/.*"id": "\(.*\)",/\1/p; s/.*"tool": "\(.*\)",/  tool: \1/p; s/.*"status": "\(.*\)",/  status: \1/p' "$REGISTRY"
+    fi
+    ;;
+  check)
+    missing=0
+    for file in \
+      "$ROOT_DIR/model/model.onnx" \
+      "$ROOT_DIR/model/tokens.json" \
+      "$ROOT_DIR/model/am.mvn" \
+      "$ROOT_DIR/model/config.yaml" \
+      "$ROOT_DIR/bin/ofasr" \
+      "$ROOT_DIR/bin/ffmpeg"; do
+      if [[ ! -e "$file" ]]; then
+        echo "missing: $file" >&2
+        missing=1
+      fi
+    done
+    if [[ "$missing" -ne 0 ]]; then
+      exit 1
+    fi
+    echo "installed model pack ready: asr-sensevoice-small-onnx"
+    ;;
+  -h|--help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $1" >&2
+    usage
+    exit 2
+    ;;
+esac

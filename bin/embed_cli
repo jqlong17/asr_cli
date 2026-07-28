@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  check)
+    if [[ "${2:-}" == "--json" ]]; then
+      printf '{"tool":"embed_cli","status":"planned","ready":false,"missing":["models/embed/minilm/model.onnx","models/embed/minilm/tokenizer.json"]}\n'
+    else
+      echo "embed_cli planned; MiniLM model pack is not installed"
+    fi
+    exit 1
+    ;;
+  -h|--help|help|"")
+    cat <<'USAGE'
+Usage:
+  embed_cli check [--json]
+  embed_cli embed "text" -o vector.json
+  embed_cli index docs/ -o index/
+  embed_cli search "query" index/
+
+Status:
+  Planned. MiniLM embedding model pack is not bundled yet.
+USAGE
+    ;;
+  *)
+    echo "embed_cli is planned but not implemented yet. See docs/LOCAL_AI_TOOLBOX_ROADMAP.md" >&2
+    exit 2
+    ;;
+esac

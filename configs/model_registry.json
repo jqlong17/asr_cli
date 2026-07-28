@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "project": "asr_cli-local-ai-toolbox",
+  "principles": {
+    "default_package": "small-fast-offline",
+    "model_packs": "optional",
+    "no_fake_capabilities": true
+  },
+  "models": [
+    {
+      "id": "asr-sensevoice-small-onnx",
+      "tool": "asr_cli",
+      "status": "installed",
+      "backend": "onnxruntime",
+      "runtime": "bin/ofasr",
+      "install_dir": "model",
+      "size_class": "medium",
+      "required_files": [
+        "model/model.onnx",
+        "model/tokens.json",
+        "model/am.mvn",
+        "model/config.yaml"
+      ],
+      "commands": [
+        "./transcribe <audio> -o result.txt",
+        "./serve",
+        "./transcribe-server <audio> -o result.txt"
+      ]
+    },
+    {
+      "id": "vad-silero-onnx",
+      "tool": "vad_cli",
+      "status": "planned",
+      "backend": "onnxruntime",
+      "install_dir": "models/vad/silero",
+      "size_class": "tiny",
+      "required_files": [
+        "models/vad/silero/model.onnx"
+      ],
+      "commands": [
+        "vad_cli segment <audio> -o segments.json",
+        "vad_cli split <audio> -o chunks/"
+      ]
+    },
+    {
+      "id": "tts-kokoro-onnx",
+      "tool": "tts_cli",
+      "status": "planned",
+      "backend": "sherpa-onnx",
+      "install_dir": "models/tts/kokoro",
+      "size_class": "large-optional",
+      "required_files": [
+        "models/tts/kokoro/model.onnx",
+        "models/tts/kokoro/voices.bin",
+        "models/tts/kokoro/tokens.txt"
+      ],
+      "commands": [
+        "tts_cli speak \"hello\" -o hello.wav",
+        "tts_cli voices"
+      ]
+    },
+    {
+      "id": "embed-minilm-onnx",
+      "tool": "embed_cli",
+      "status": "planned",
+      "backend": "onnxruntime",
+      "install_dir": "models/embed/minilm",
+      "size_class": "small",
+      "required_files": [
+        "models/embed/minilm/model.onnx",
+        "models/embed/minilm/tokenizer.json"
+      ],
+      "commands": [
+        "embed_cli embed \"query\" -o vector.json",
+        "embed_cli index docs/ -o index/"
+      ]
+    },
+    {
+      "id": "vision-mobileclip-or-nomic",
+      "tool": "vision_cli",
+      "status": "planned",
+      "backend": "onnxruntime",
+      "install_dir": "models/vision",
+      "size_class": "small-to-medium-optional",
+      "required_files": [],
+      "commands": [
+        "vision_cli embed image.png -o image.vector.json",
+        "vision_cli search \"query\" image_index/"
+      ]
+    },
+    {
+      "id": "route-small-gguf",
+      "tool": "route_cli",
+      "status": "planned",
+      "backend": "llama.cpp",
+      "install_dir": "models/route",
+      "size_class": "small-to-medium-optional",
+      "required_files": [
+        "models/route/model.gguf"
+      ],
+      "commands": [
+        "route_cli route \"transcribe this audio\""
+      ]
+    }
+  ]
+}
