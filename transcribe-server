@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FFMPEG="$ROOT_DIR/bin/ffmpeg"
+ADDR="${ASR_CLI_ADDR:-127.0.0.1:8765}"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  ./transcribe-server <audio-file> [-o output.txt]
+  ./transcribe-server <audio-file> --json [-o output.json]
+
+Examples:
+  ./serve
+  ./transcribe-server ~/Downloads/demo.mp3 -o demo.txt
+  ./transcribe-server ~/Downloads/demo.mp3 --json -o demo.json
+
+Notes:
+  - Requires ./serve to be running first.
+  - Converts input audio/video to a temporary 16 kHz mono WAV, then sends the local file path to the server.
+USAGE
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 2
+fi
+
+INPUT=""
+OUTPUT=""
+JSON=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -o|--output)
+      if [[ $# -lt 2 ]]; then
+        echo "Missing value for $1" >&2
+        exit 2
+      fi
+      OUTPUT="$2"
+      shift 2
+      ;;
+    --json)
+      JSON=1
+      shift
+      ;;
+    --addr)
+      if [[ $# -lt 2 ]]; then
+        echo "Missing value for --addr" >&2
+        exit 2
+      fi
+      ADDR="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      if [[ -z "$INPUT" ]]; then
+        INPUT="$1"
+        shift
+      else
+        echo "Unexpected argument: $1" >&2
+        usage
+        exit 2
+      fi
+      ;;
+  esac
+done
+
+if [[ -z "$INPUT" ]]; then
+  echo "Missing audio file." >&2
+  usage
+  exit 2
+fi
+
+if [[ ! -f "$INPUT" ]]; then
+  echo "Audio file not found: $INPUT" >&2
+  exit 1
+fi
+
+if [[ ! -x "$FFMPEG" ]]; then
+  echo "Missing executable: $FFMPEG" >&2
+  exit 1
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+  echo "Missing curl." >&2
+  exit 1
+fi
+
+TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/asr_cli_server.XXXXXX")"
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+WAV="$TMP_DIR/input-16k-mono.wav"
+"$FFMPEG" -hide_banner -loglevel error -y -nostdin \
+  -i "$INPUT" \
+  -vn -ac 1 -ar 16000 -c:a pcm_s16le "$WAV"
+
+if [[ "$JSON" -eq 1 ]]; then
+  RESULT="$(printf '%s' "$WAV" | curl -fsS --data-binary @- "http://$ADDR/transcribe")"
+else
+  RESULT="$(printf '%s' "$WAV" | curl -fsS --data-binary @- "http://$ADDR/transcribe.txt")"
+fi
+
+if [[ -n "$OUTPUT" ]]; then
+  mkdir -p "$(dirname "$OUTPUT")"
+  printf '%s\n' "$RESULT" > "$OUTPUT"
+else
+  printf '%s\n' "$RESULT"
+fi

@@ -35,3 +35,29 @@ If the caller already has a 16 kHz mono PCM WAV file, it can call the bundled en
 ```
 
 For general audio/video files, prefer `transcribe` because it performs audio conversion first.
+
+## Persistent local server
+
+Start the server once:
+
+```bash
+/absolute/path/to/asr_cli/serve
+```
+
+Then call it through the helper script:
+
+```bash
+/absolute/path/to/asr_cli/transcribe-server /absolute/path/to/audio.mp3 -o /absolute/path/to/result.txt
+```
+
+The server keeps the ONNX model loaded between requests, which is faster for many short files.
+
+Low-level HTTP calls:
+
+```bash
+curl -fsS http://127.0.0.1:8765/health
+printf '%s' /absolute/path/to/input-16k-mono.wav \
+  | curl -fsS --data-binary @- http://127.0.0.1:8765/transcribe
+printf '%s' /absolute/path/to/input-16k-mono.wav \
+  | curl -fsS --data-binary @- http://127.0.0.1:8765/transcribe.txt
+```

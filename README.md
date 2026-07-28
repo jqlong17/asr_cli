@@ -14,13 +14,15 @@
 - `bin/ffmpeg`：音频格式转换工具
 - `model/`：已打包好的 SenseVoice Small ONNX 模型，不需要使用者再下载
 - `transcribe`：推荐入口脚本，支持 mp3 / wav / m4a / mp4 / mov 等常见音视频输入
+- `serve`：常驻本机 HTTP 服务，启动后模型只加载一次
+- `transcribe-server`：连接 `serve` 的客户端脚本，适合批量短音频
 
 ## 使用方式
 
 进入工具目录：
 
 ```bash
-cd ~/Desktop/asr_cli
+cd /path/to/asr_cli
 ```
 
 直接输出到终端：
@@ -41,12 +43,40 @@ cd ~/Desktop/asr_cli
 ./transcribe /path/to/audio.mp3 --json -o /path/to/result.json
 ```
 
+## 常驻服务模式
+
+如果要连续转写很多短音频，先启动服务：
+
+```bash
+./serve
+```
+
+另开一个终端，通过服务转写：
+
+```bash
+./transcribe-server /path/to/audio.mp3 -o /path/to/result.txt
+```
+
+服务默认监听 `127.0.0.1:8765`，可以这样改端口：
+
+```bash
+./serve --addr 127.0.0.1:8766
+./transcribe-server /path/to/audio.mp3 --addr 127.0.0.1:8766 -o result.txt
+```
+
 ## 给其他 AI 调用
 
 最简单的调用方式：
 
 ```bash
 /path/to/asr_cli/transcribe /path/to/audio.mp3 -o /path/to/result.txt
+```
+
+批量调用时，推荐先启动服务，再调用：
+
+```bash
+/path/to/asr_cli/serve
+/path/to/asr_cli/transcribe-server /path/to/audio.mp3 -o /path/to/result.txt
 ```
 
 返回纯文本时，结果文件就是转写文本。

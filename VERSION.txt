@@ -10,6 +10,12 @@ Bundled components:
 Recommended entrypoint:
 ./transcribe <audio-file> -o <result.txt>
 
+Persistent server mode:
+./serve
+./transcribe-server <audio-file> -o <result.txt>
+
 Verified locally:
 - Model check: ready
 - Test transcription: passed
+- Server health: passed
+- Server transcription: passed
